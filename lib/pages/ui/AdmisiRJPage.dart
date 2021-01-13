@@ -11,30 +11,33 @@ class AdmisiRJPage extends StatelessWidget with NavigationStates, Validation {
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
-    return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-          color: Colors.white,
-        ),
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 48),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    InkWell(
-                      child: Icon(Icons.menu, color: Colors.blueGrey),
-                      onTap: onMenuTap,
-                    ),
-                    Text("Pendaftaran",
-                        style: TextStyle(fontSize: 24, color: Colors.blueGrey)),
-                  ]),
-              Form(
-                  key: formKey, //MENGGUNAKAN GLOBAL KEY
-                  child: Column(children: [nameField(), notelpField()]))
-            ]));
+    return Scaffold(
+        body: SingleChildScrollView(
+            child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.only(left: 16, right: 16, top: 48),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            InkWell(
+                              child: Icon(Icons.menu, color: Colors.blueGrey),
+                              onTap: onMenuTap,
+                            ),
+                            Text("Pendaftaran",
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.blueGrey)),
+                          ]),
+                      Form(
+                          key: formKey, //MENGGUNAKAN GLOBAL KEY
+                          child: Column(children: [nameField(), notelpField()]))
+                    ]))));
   }
 
   Widget nameField() {
