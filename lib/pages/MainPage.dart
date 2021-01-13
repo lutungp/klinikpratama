@@ -10,7 +10,6 @@ import 'package:klinikpratama/pages/ui/utility_bills_page.dart';
 final Color backgroundColor = Color(0xFF4A4A58);
 
 class MainPage extends StatefulWidget {
-  static String tag = 'home-page';
   @override
   _MainPageState createState() => new _MainPageState();
 }
