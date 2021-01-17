@@ -9,7 +9,7 @@ class MyDashboardPage extends StatelessWidget with NavigationStates {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
+          // borderRadius: BorderRadius.all(Radius.circular(20)),
           color: Colors.yellowAccent,
         ),
         padding: const EdgeInsets.only(left: 16, right: 16, top: 48),

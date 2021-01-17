@@ -1,0 +1,9 @@
+{
+    "rest-client.environmentVariables" : {
+        "sandbox" : {
+            "baseUrl" : "https://192.168.10.170:8000",
+            "authorization" : ""
+        },
+        "production" : {}
+    }
+}

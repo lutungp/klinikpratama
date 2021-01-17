@@ -43,6 +43,10 @@ class AuthService {
   static removeToken() async {
     await SESSION.prefs.clear();
   }
+
+  getMyToken() async {
+    return await SESSION.get('tokens');
+  }
 }
 
 class _AuthData {
