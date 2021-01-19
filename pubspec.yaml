@@ -33,6 +33,7 @@ dependencies:
   flutter_bloc: ^2.1.1
   flutter_session: ^0.1.1
   dio: ^3.0.10
+  cool_alert: ^1.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,7 +4,11 @@ import 'package:klinikpratama/services/ApiService.dart';
 import 'MyTextFieldDatePicker.dart';
 import '../../mixins/uservalidation.dart';
 import 'package:klinikpratama/models/MPasienBaru.dart';
+import 'package:klinikpratama/loader/dialogLoader.dart';
+import 'package:cool_alert/cool_alert.dart';
+import 'dart:convert';
 
+String norm;
 List<Map> _listGender = [
   {"value": "L", "text": 'Laki-laki'},
   {"value": "P", "text": 'Perempuan'}
@@ -23,7 +27,9 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
   List<dynamic> _listAgama = List();
 
   final formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   MPasienBaru model = MPasienBaru();
+  final JsonDecoder _decoder = new JsonDecoder();
 
   void getAgama() async {
     try {
@@ -280,7 +286,38 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
     final form = formKey.currentState;
     if (form.validate()) {
       form.save();
-      model.save();
+      var databody = model.save();
+      Dialogs.showLoadingDialog(context, _scaffoldKey);
+      try {
+        var response = await _apiService
+            .api()
+            .then((value) => value.post("master/createpasien", data: databody));
+
+        Navigator.of(_scaffoldKey.currentContext, rootNavigator: true).pop();
+        if (response.statusCode == 200) {
+          setState(() {
+            norm = response.data["norm"];
+          });
+          formKey.currentState?.reset();
+          CoolAlert.show(
+            context: context,
+            type: CoolAlertType.success,
+            text: 'Pasien berhasil disimpan, dengan No. RM $norm',
+          );
+        } else {
+          CoolAlert.show(
+            context: context,
+            type: CoolAlertType.error,
+            text: "Cek koneksi anda, atau hubungi administrator!",
+          );
+        }
+      } catch (e) {
+        CoolAlert.show(
+          context: context,
+          type: CoolAlertType.error,
+          text: "Cek koneksi anda, atau hubungi administrator!",
+        );
+      }
     }
   }
 }
