@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:klinikpratama/bloc/navigation_bloc/navigation_bloc.dart';
 import 'package:klinikpratama/services/ApiService.dart';
-import 'dart:convert';
+import 'MyTextFieldDatePicker.dart';
+import '../../mixins/uservalidation.dart';
 
-String name, notelp, _valGender, _valAgama;
+String name, notelp, _valGender, _valAgama, _valAlamat;
+DateTime _valTglLahir;
 List<Map> _listGender = [
   {"value": "L", "text": 'Laki-laki'},
   {"value": "P", "text": 'Perempuan'}
@@ -19,28 +21,32 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
   ApiService _apiService = ApiService();
   FocusNode telpNode, genderNode, agamaNode;
   List<dynamic> _listAgama = List();
-
+  final formKey = GlobalKey<FormState>();
+  TextEditingController _textController = new TextEditingController();
   void getAgama() async {
     try {
       var response =
           await _apiService.api().then((value) => value.get("master/agama"));
-      print(response);
+      setState(() {
+        _listAgama = response.data;
+      });
     } catch (e) {
       print("error");
     }
-    // var token = ApiService.httpRequest;
-    // final respose = await http.get(_baseUrl + "master/agama");
-    // var listData = json.decode(respose.body);
-    // setState(() {
-    //   _listAgama = listData;
-    // });
-    // print("data : $listData");
+  }
+
+  int _cIndex = 0;
+  @override
+  void _incrementTab(index) {
+    setState(() {
+      _cIndex = index;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-
+    formKey.currentState?.reset();
     telpNode = FocusNode();
     genderNode = FocusNode();
 
@@ -58,7 +64,6 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     return Scaffold(
         body: SingleChildScrollView(
             child: Container(
@@ -88,9 +93,37 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
                             nameField(),
                             notelpField(),
                             genderField(),
-                            agamaField()
+                            agamaField(),
+                            alamatField(),
+                            tgllahirField(),
+                            Padding(
+                                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                child: usiaField()),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  _buildSubmitButton(),
+                                  SizedBox(width: 20),
+                                  _buildResetButton()
+                                ])
                           ]))
-                    ]))));
+                    ]))),
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false, // <-- HERE
+          showUnselectedLabels: false,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.list, color: Colors.blueGrey),
+                title: Text('')),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person, color: Colors.blueGrey),
+              title: Text(''),
+            ),
+          ],
+          onTap: (index) {
+            _incrementTab(index);
+          },
+        ));
   }
 
   Widget nameField() {
@@ -109,7 +142,8 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
     return TextFormField(
       focusNode: telpNode,
       decoration: InputDecoration(labelText: 'No. Telepon'),
-      validator: widget.validateName,
+      keyboardType: TextInputType.number,
+      validator: widget.notelpName,
       onSaved: (String value) {
         notelp = value;
       },
@@ -131,6 +165,7 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       }).toList(),
       onChanged: (value) {
         _valGender = value;
+        agamaNode.nextFocus();
       },
     );
   }
@@ -140,11 +175,11 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       focusNode: agamaNode,
       isExpanded: true,
       hint: Text("Pilih Agama"),
-      value: _valGender,
-      items: _listGender.map((item) {
+      value: _valAgama,
+      items: _listAgama.map((item) {
         return DropdownMenuItem(
-          value: item["value"],
-          child: Text(item["text"]),
+          value: item["agama_id"],
+          child: Text(item["agama_nama"]),
         );
       }).toList(),
       onChanged: (value) {
@@ -152,14 +187,91 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       },
     );
   }
-}
 
-class Validation {
-  String validateName(String value) {
-    if (value.isEmpty || value.length < 3 || value.length > 100) {
-      //JIKA VALUE KOSONG
-      return 'Nama minimal 3 & maksimal 100 karakter'; //MAKA PESAN DITAMPILKAN
+  Widget alamatField() {
+    return TextFormField(
+      autofocus: true,
+      decoration: InputDecoration(labelText: 'Alamat'),
+      keyboardType: TextInputType.multiline,
+      minLines: 1, //Normal textInputField will be displayed
+      maxLines: 5, // when user presses enter it will adapt to it
+      onSaved: (String value) {
+        _valAlamat = value;
+      },
+      onEditingComplete: () => telpNode.nextFocus(),
+    );
+  }
+
+  Widget tgllahirField() {
+    return MyTextFieldDatePicker(
+      labelText: "Date",
+      lastDate: DateTime.now().add(Duration(days: 366)),
+      firstDate: DateTime(1900, 1),
+      initialDate: DateTime.now().add(Duration(days: 1)),
+      onDateChanged: (selectedDate) {
+        setState(() {
+          _valTglLahir = selectedDate;
+        });
+      },
+    );
+  }
+
+  Widget usiaField() {
+    int usia = calculateAge(_valTglLahir);
+    return Text(
+      'Usia : $usia',
+      textAlign: TextAlign.right,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(fontSize: 24, color: Colors.blueGrey),
+    );
+  }
+
+  calculateAge(DateTime birthDate) {
+    DateTime currentDate = DateTime.now();
+    int age = currentDate.year - birthDate.year;
+    int month1 = currentDate.month;
+    int month2 = birthDate.month;
+    if (month2 > month1) {
+      age--;
+    } else if (month1 == month2) {
+      int day1 = currentDate.day;
+      int day2 = birthDate.day;
+      if (day2 > day1) {
+        age--;
+      }
     }
-    return null;
+    return age;
+  }
+
+  Widget _buildSubmitButton() {
+    return RaisedButton(
+      onPressed: () {
+        simpanPasienBaru();
+      },
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Text('Simpan'),
+    );
+  }
+
+  Widget _buildResetButton() {
+    return RaisedButton(
+      onPressed: () {
+        formKey.currentState?.reset();
+      },
+      color: Colors.redAccent,
+      textColor: Colors.white,
+      child: Text('Reset'),
+    );
+  }
+
+  Future<dynamic> simpanPasienBaru() async {
+    if (formKey.currentState.validate()) {
+      var response = await _apiService
+          .api()
+          .then((value) => value.post("master/createpasien"));
+
+      print(response);
+    }
   }
 }
