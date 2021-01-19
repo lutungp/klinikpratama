@@ -3,9 +3,8 @@ import 'package:klinikpratama/bloc/navigation_bloc/navigation_bloc.dart';
 import 'package:klinikpratama/services/ApiService.dart';
 import 'MyTextFieldDatePicker.dart';
 import '../../mixins/uservalidation.dart';
+import 'package:klinikpratama/models/MPasienBaru.dart';
 
-String name, notelp, _valGender, _valAgama, _valAlamat;
-DateTime _valTglLahir;
 List<Map> _listGender = [
   {"value": "L", "text": 'Laki-laki'},
   {"value": "P", "text": 'Perempuan'}
@@ -20,9 +19,12 @@ class AdmisiRJPage extends StatefulWidget with NavigationStates, Validation {
 class AdmisiRJSate extends State<AdmisiRJPage> {
   ApiService _apiService = ApiService();
   FocusNode telpNode, genderNode, agamaNode;
+
   List<dynamic> _listAgama = List();
+
   final formKey = GlobalKey<FormState>();
-  TextEditingController _textController = new TextEditingController();
+  MPasienBaru model = MPasienBaru();
+
   void getAgama() async {
     try {
       var response =
@@ -113,11 +115,10 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
           showUnselectedLabels: false,
           items: [
             BottomNavigationBarItem(
-                icon: Icon(Icons.list, color: Colors.blueGrey),
-                title: Text('')),
+                icon: Icon(Icons.list, color: Colors.blueGrey), label: ''),
             BottomNavigationBarItem(
               icon: Icon(Icons.person, color: Colors.blueGrey),
-              title: Text(''),
+              label: '',
             ),
           ],
           onTap: (index) {
@@ -132,7 +133,7 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       decoration: InputDecoration(labelText: 'Nama Lengkap'),
       validator: widget.validateName,
       onSaved: (String value) {
-        name = value;
+        model.name = value;
       },
       onEditingComplete: () => telpNode.nextFocus(),
     );
@@ -145,7 +146,9 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       keyboardType: TextInputType.number,
       validator: widget.notelpName,
       onSaved: (String value) {
-        notelp = value;
+        setState(() {
+          model.notelp = value;
+        });
       },
       onEditingComplete: () => genderNode.nextFocus(),
     );
@@ -156,7 +159,7 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       focusNode: genderNode,
       isExpanded: true,
       hint: Text("Pilih Jenis Kelamin"),
-      value: _valGender,
+      value: model.gender,
       items: _listGender.map((item) {
         return DropdownMenuItem(
           value: item["value"],
@@ -164,8 +167,9 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
         );
       }).toList(),
       onChanged: (value) {
-        _valGender = value;
-        agamaNode.nextFocus();
+        setState(() {
+          model.gender = value;
+        });
       },
     );
   }
@@ -175,7 +179,7 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       focusNode: agamaNode,
       isExpanded: true,
       hint: Text("Pilih Agama"),
-      value: _valAgama,
+      value: model.agama,
       items: _listAgama.map((item) {
         return DropdownMenuItem(
           value: item["agama_id"],
@@ -183,7 +187,9 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
         );
       }).toList(),
       onChanged: (value) {
-        _valAgama = value;
+        setState(() {
+          model.agama = value;
+        });
       },
     );
   }
@@ -196,7 +202,9 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       minLines: 1, //Normal textInputField will be displayed
       maxLines: 5, // when user presses enter it will adapt to it
       onSaved: (String value) {
-        _valAlamat = value;
+        setState(() {
+          model.alamat = value;
+        });
       },
       onEditingComplete: () => telpNode.nextFocus(),
     );
@@ -210,14 +218,14 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
       initialDate: DateTime.now().add(Duration(days: 1)),
       onDateChanged: (selectedDate) {
         setState(() {
-          _valTglLahir = selectedDate;
+          model.tgllahir = selectedDate;
         });
       },
     );
   }
 
   Widget usiaField() {
-    int usia = calculateAge(_valTglLahir);
+    int usia = calculateAge(model.tgllahir);
     return Text(
       'Usia : $usia',
       textAlign: TextAlign.right,
@@ -228,6 +236,9 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
 
   calculateAge(DateTime birthDate) {
     DateTime currentDate = DateTime.now();
+    if (birthDate == null) {
+      return 0;
+    }
     int age = currentDate.year - birthDate.year;
     int month1 = currentDate.month;
     int month2 = birthDate.month;
@@ -266,12 +277,10 @@ class AdmisiRJSate extends State<AdmisiRJPage> {
   }
 
   Future<dynamic> simpanPasienBaru() async {
-    if (formKey.currentState.validate()) {
-      var response = await _apiService
-          .api()
-          .then((value) => value.post("master/createpasien"));
-
-      print(response);
+    final form = formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      model.save();
     }
   }
 }
