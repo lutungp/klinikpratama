@@ -15,12 +15,13 @@ class AdmisiRJState extends State<AdmisiRJPage> {
   int _selectedIndex = 0;
 
   List<Widget> _widgetOptions = <Widget>[
-    AddAdmisiRjPage(),
+    AddAdmisiRjPage(onMenuTap: () {}),
     AddPasienPage(onFlatButtonPressed: (value) {
       norm = value;
     })
   ];
 
+  @override
   void _onItemTap(int index) {
     setState(() {
       _selectedIndex = index;

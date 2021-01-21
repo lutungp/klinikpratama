@@ -1,10 +1,22 @@
 import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
+import 'package:klinikpratama/models/UserModel.dart';
+import 'package:klinikpratama/LocalBindings.dart';
+import 'dart:convert';
+import 'ApiService.dart';
 
 class AuthService {
-  final baseUrl = 'http://klinikapi.pratamasehat.com';
+  final baseUrl = 'http://klinikapi.pratamasehat.com/api';
   // ignore: non_constant_identifier_names
   static final SESSION = FlutterSession();
+
+  UserModel _currentUser;
+
+  UserModel get currentUser => _currentUser;
+
+  set currentUser(UserModel value) => _currentUser;
+
+  ApiService _apiProvider = ApiService();
 
   Future<dynamic> register(String email, String password) async {
     try {
@@ -20,15 +32,38 @@ class AuthService {
   }
 
   Future<dynamic> login(String email, String password) async {
-    var res = await http.post(
-      '$baseUrl/user/login',
-      body: {
-        'name': email,
-        'password': password,
-      },
-    );
+    var body = {
+      'name': email,
+      'password': password,
+    };
+    var res = await http.post('$baseUrl/user/login', body: body);
+
+    if (res.statusCode != 200) {
+      LocalStorage.sharedInstance
+          .writeValue(key: 'UserLogin', value: json.encode(body));
+    }
 
     return res;
+  }
+
+  Future refreshToken() async {
+    String dataSession =
+        await LocalStorage.sharedInstance.readValue('UserLogin');
+    var body = json.decode(dataSession);
+    try {
+      var response = await _apiProvider
+          .api()
+          .then((value) => value.post("/user/login", data: body));
+
+      return response.data;
+    } catch (error, stacktrace) {
+      throw Exception("Exception occured: $error stackTrace: $stacktrace");
+    }
+  }
+
+  static setUserLogin(String token, String refreshToken) async {
+    _AuthData data = _AuthData(token, refreshToken);
+    await SESSION.set('tokens', data);
   }
 
   static setToken(String token, String refreshToken) async {

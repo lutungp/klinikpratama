@@ -23,6 +23,16 @@ class ApiService {
     }, onError: (DioError error) async {
       // Do something with response error //
       print(error.response);
+      if (error.response?.statusCode == 401) {
+        _dio.interceptors.requestLock.lock();
+        _dio.interceptors.responseLock.lock();
+        RequestOptions options = error.response.request;
+        var token = await AuthService().refreshToken();
+        print(token);
+        options.headers["Authorization"] = "Bearer " + token['data']['jwt'];
+        _dio.interceptors.requestLock.unlock();
+        _dio.interceptors.responseLock.unlock();
+      } else if (error.response?.statusCode == 429) {}
     }));
     _dio.options.baseUrl = baseUrlNew;
     return _dio;

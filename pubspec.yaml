@@ -34,6 +34,7 @@ dependencies:
   flutter_session: ^0.1.1
   dio: ^3.0.10
   cool_alert: ^1.0.3
+  flutter_secure_storage: ^3.3.1+1
 dev_dependencies:
   flutter_test:
     sdk: flutter

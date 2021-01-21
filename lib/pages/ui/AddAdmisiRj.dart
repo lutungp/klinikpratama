@@ -3,7 +3,8 @@ import 'package:klinikpratama/bloc/navigation_bloc/navigation_bloc.dart';
 
 class AddAdmisiRjPage extends StatefulWidget with NavigationStates {
   final String norm;
-  const AddAdmisiRjPage({Key key, this.norm}) : super(key: key);
+  final Function onMenuTap;
+  const AddAdmisiRjPage({Key key, this.norm, this.onMenuTap}) : super(key: key);
   AddAdmisiRjState createState() => AddAdmisiRjState();
 }
 
@@ -27,7 +28,9 @@ class AddAdmisiRjState extends State<AddAdmisiRjPage> {
                           children: [
                             InkWell(
                               child: Icon(Icons.menu, color: Colors.blueGrey),
-                              onTap: () {},
+                              onTap: () {
+                                widget.onMenuTap;
+                              },
                             ),
                             Text("Pendaftaran",
                                 style: TextStyle(
