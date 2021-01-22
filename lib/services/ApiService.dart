@@ -27,9 +27,8 @@ class ApiService {
         _dio.interceptors.requestLock.lock();
         _dio.interceptors.responseLock.lock();
         RequestOptions options = error.response.request;
-        var token = await AuthService().refreshToken();
-        print(token);
-        options.headers["Authorization"] = "Bearer " + token['data']['jwt'];
+        var datarefresh = await AuthService().refreshToken();
+        options.headers["Authorization"] = "Bearer " + datarefresh['token'];
         _dio.interceptors.requestLock.unlock();
         _dio.interceptors.responseLock.unlock();
       } else if (error.response?.statusCode == 429) {}

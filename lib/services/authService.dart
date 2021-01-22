@@ -37,8 +37,7 @@ class AuthService {
       'password': password,
     };
     var res = await http.post('$baseUrl/user/login', body: body);
-
-    if (res.statusCode != 200) {
+    if (res.statusCode == 200) {
       LocalStorage.sharedInstance
           .writeValue(key: 'UserLogin', value: json.encode(body));
     }
@@ -51,11 +50,9 @@ class AuthService {
         await LocalStorage.sharedInstance.readValue('UserLogin');
     var body = json.decode(dataSession);
     try {
-      var response = await _apiProvider
-          .api()
-          .then((value) => value.post("/user/login", data: body));
-
-      return response.data;
+      var response = await http.post('$baseUrl/user/login', body: body);
+      var res = response.body;
+      return json.decode(res);
     } catch (error, stacktrace) {
       throw Exception("Exception occured: $error stackTrace: $stacktrace");
     }

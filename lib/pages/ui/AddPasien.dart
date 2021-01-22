@@ -63,50 +63,23 @@ class AddPasienState extends State<AddPasienPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SingleChildScrollView(
-            child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                  color: Colors.white,
-                ),
-                padding: const EdgeInsets.only(left: 16, right: 16, top: 48),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            InkWell(
-                              child: Icon(Icons.menu, color: Colors.blueGrey),
-                              onTap: () {},
-                            ),
-                            Text("Pendaftaran",
-                                style: TextStyle(
-                                    fontSize: 24, color: Colors.blueGrey)),
-                          ]),
-                      Form(
-                          key: formKey,
-                          child: Column(children: [
-                            nameField(),
-                            notelpField(),
-                            genderField(),
-                            agamaField(),
-                            alamatField(),
-                            tgllahirField(),
-                            Padding(
-                                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                                child: usiaField()),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  _buildSubmitButton(),
-                                  SizedBox(width: 20),
-                                  _buildResetButton()
-                                ])
-                          ]))
-                    ]))));
+    return Form(
+        key: formKey,
+        child: Column(children: [
+          nameField(),
+          notelpField(),
+          genderField(),
+          agamaField(),
+          alamatField(),
+          tgllahirField(),
+          Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10), child: usiaField()),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            _buildSubmitButton(),
+            SizedBox(width: 20),
+            _buildResetButton()
+          ])
+        ]));
   }
 
   Widget nameField() {
