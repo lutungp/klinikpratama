@@ -49,7 +49,6 @@ class AuthService {
     try {
       var response = await http.post('$baseUrl/user/login', body: body);
       var res = json.decode(response.body);
-      print(res['token']);
       setToken("token", res['token']);
 
       return res;
