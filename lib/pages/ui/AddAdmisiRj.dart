@@ -4,6 +4,9 @@ import 'package:klinikpratama/bloc/navigation_bloc/navigation_bloc.dart';
 import 'package:klinikpratama/models/MAdmisiRJ.dart';
 import '../../mixins/daftarRjvalidation.dart';
 import 'package:klinikpratama/services/ApiService.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+import 'DataDokter.dart';
 
 class AddAdmisiRjPage extends StatefulWidget
     with NavigationStates, DaftarValidation {
@@ -21,6 +24,9 @@ class AddAdmisiRjState extends State<AddAdmisiRjPage> {
   final formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   MAdmisiRJ model = MAdmisiRJ();
+
+  final TextEditingController _typeAheadController = TextEditingController();
+  String _selectedDokter;
 
   void getDokter() async {
     String tgl = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -80,21 +86,24 @@ class AddAdmisiRjState extends State<AddAdmisiRjPage> {
   }
 
   Widget dokterField() {
-    return DropdownButtonFormField(
-      focusNode: dokterNode,
-      isExpanded: true,
-      hint: Text("Pilih Dokter"),
-      value: model.dokter,
-      items: _listDokter.map((item) {
-        return DropdownMenuItem(
-          value: item["pegawai_id"],
-          child: Text(item["pegawai_nama"]),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          model.dokter = value;
-        });
+    return TypeAheadFormField(
+      textFieldConfiguration: TextFieldConfiguration(
+          controller: this._typeAheadController,
+          decoration: InputDecoration(labelText: 'Pilih Dokter')),
+      suggestionsCallback: (pattern) {
+        return DataDokterService.getSuggestions(pattern);
+      },
+      itemBuilder: (context, suggestion) {
+        return ListTile(title: Text(suggestion["name"]));
+      },
+      transitionBuilder: (context, suggestionsBox, controller) {
+        return suggestionsBox;
+      },
+      onSuggestionSelected: (suggestion) {},
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Pilih dokter terlebih dahulu';
+        }
       },
     );
   }
