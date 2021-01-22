@@ -8,7 +8,7 @@ class ApiService {
   Future<Dio> api() async {
     // EasyLoading.showProgress(2, status: 'loading');
     var gettoken = await AuthService().getMyToken();
-    String token = gettoken["token"];
+    String token = gettoken["refreshToken"];
     _dio.interceptors.clear();
     _dio.interceptors
         .add(InterceptorsWrapper(onRequest: (RequestOptions options) {
@@ -22,8 +22,7 @@ class ApiService {
       return response; // continue
     }, onError: (DioError error) async {
       // Do something with response error //
-      print(error.response);
-      if (error.response?.statusCode == 401) {
+      if (error.response.statusCode == 401) {
         _dio.interceptors.requestLock.lock();
         _dio.interceptors.responseLock.lock();
         RequestOptions options = error.response.request;
@@ -31,7 +30,8 @@ class ApiService {
         options.headers["Authorization"] = "Bearer " + datarefresh['token'];
         _dio.interceptors.requestLock.unlock();
         _dio.interceptors.responseLock.unlock();
-      } else if (error.response?.statusCode == 429) {}
+        return _dio.request(options.path, options: options);
+      } else if (error.response.statusCode == 429) {}
     }));
     _dio.options.baseUrl = baseUrlNew;
     return _dio;

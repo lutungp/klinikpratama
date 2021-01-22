@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:klinikpratama/models/UserModel.dart';
 import 'package:klinikpratama/LocalBindings.dart';
 import 'dart:convert';
-import 'ApiService.dart';
 
 class AuthService {
   final baseUrl = 'http://klinikapi.pratamasehat.com/api';
@@ -15,8 +14,6 @@ class AuthService {
   UserModel get currentUser => _currentUser;
 
   set currentUser(UserModel value) => _currentUser;
-
-  ApiService _apiProvider = ApiService();
 
   Future<dynamic> register(String email, String password) async {
     try {
@@ -51,8 +48,11 @@ class AuthService {
     var body = json.decode(dataSession);
     try {
       var response = await http.post('$baseUrl/user/login', body: body);
-      var res = response.body;
-      return json.decode(res);
+      var res = json.decode(response.body);
+      print(res['token']);
+      setToken("token", res['token']);
+
+      return res;
     } catch (error, stacktrace) {
       throw Exception("Exception occured: $error stackTrace: $stacktrace");
     }
