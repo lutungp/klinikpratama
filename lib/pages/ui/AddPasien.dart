@@ -167,7 +167,7 @@ class AddPasienState extends State<AddPasienPage> {
 
   Widget tgllahirField() {
     return MyTextFieldDatePicker(
-      labelText: "Date",
+      labelText: "Tgl. Lahir",
       lastDate: DateTime.now().add(Duration(days: 366)),
       firstDate: DateTime(1900, 1),
       initialDate: DateTime.now().add(Duration(days: 1)),

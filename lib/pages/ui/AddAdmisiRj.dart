@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:klinikpratama/bloc/navigation_bloc/navigation_bloc.dart';
 import 'package:klinikpratama/models/MAdmisiRJ.dart';
+import 'package:klinikpratama/pages/ui/DataPasien.dart';
 import '../../mixins/daftarRjvalidation.dart';
 import 'package:klinikpratama/services/ApiService.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import 'DataDokter.dart';
+import 'MyTextFieldDatePicker.dart';
 
 class AddAdmisiRjPage extends StatefulWidget
     with NavigationStates, DaftarValidation {
@@ -18,77 +19,59 @@ class AddAdmisiRjPage extends StatefulWidget
 
 class AddAdmisiRjState extends State<AddAdmisiRjPage> {
   ApiService _apiService = ApiService();
-  FocusNode dokterNode;
-  List<dynamic> _listDokter = List();
 
   final formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   MAdmisiRJ model = MAdmisiRJ();
 
-  final TextEditingController _typeAheadController = TextEditingController();
-  String _selectedDokter;
-
-  void getDokter() async {
-    String tgl = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    String jam = DateFormat('hh:mm').format(DateTime.now());
-    try {
-      var response = await _apiService
-          .api()
-          .then((value) => value.post("master/dokter", data: {
-                "unit_id": 73,
-                "tgl": tgl,
-                "jam": jam,
-                "daftar_jenis": "INST. RAWAT JALAN",
-                "search_pegawai": "",
-                "pageSize": 15
-              }));
-      setState(() {
-        _listDokter = response.data;
-      });
-    } catch (e) {
-      print("error");
-    }
-  }
+  final TextEditingController _pasienController = TextEditingController();
+  final TextEditingController _dokterController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     formKey.currentState?.reset();
-    dokterNode = FocusNode();
-
-    getDokter();
   }
 
   @override
   Widget build(BuildContext context) {
     return Form(
         key: formKey,
-        child: Column(children: [normField(), namaField(), dokterField()]));
+        child:
+            Column(children: [normField(), dokterField(), tglDaftarField()]));
   }
 
   Widget normField() {
-    return TextFormField(
-      autofocus: true,
-      decoration: InputDecoration(labelText: 'No. RM'),
-      validator: widget.validateNorm,
-      onSaved: (String value) {
-        model.norm = value;
+    return TypeAheadFormField(
+      textFieldConfiguration: TextFieldConfiguration(
+          controller: this._pasienController,
+          decoration: InputDecoration(labelText: 'Pilih Pasien')),
+      suggestionsCallback: (pattern) {
+        return DataPasienService.getSuggestions(pattern);
       },
-      // onEditingComplete: () => telpNode.nextFocus(),
-    );
-  }
-
-  Widget namaField() {
-    return TextFormField(
-      readOnly: true,
-      decoration: InputDecoration(labelText: 'Nama Pasien'),
+      itemBuilder: (context, suggestion) {
+        return ListTile(
+            title: Text(suggestion["name"]),
+            subtitle: Text(suggestion["daftar_no"]));
+      },
+      transitionBuilder: (context, suggestionsBox, controller) {
+        return suggestionsBox;
+      },
+      onSuggestionSelected: (suggestion) {
+        model.id = suggestion["id"];
+        this._pasienController.text = suggestion["name"];
+      },
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Pilih dokter terlebih dahulu';
+        }
+      },
     );
   }
 
   Widget dokterField() {
     return TypeAheadFormField(
       textFieldConfiguration: TextFieldConfiguration(
-          controller: this._typeAheadController,
+          controller: this._dokterController,
           decoration: InputDecoration(labelText: 'Pilih Dokter')),
       suggestionsCallback: (pattern) {
         return DataDokterService.getSuggestions(pattern);
@@ -99,11 +82,28 @@ class AddAdmisiRjState extends State<AddAdmisiRjPage> {
       transitionBuilder: (context, suggestionsBox, controller) {
         return suggestionsBox;
       },
-      onSuggestionSelected: (suggestion) {},
+      onSuggestionSelected: (suggestion) {
+        model.dokter = suggestion["id"];
+        this._dokterController.text = suggestion["name"];
+      },
       validator: (value) {
         if (value.isEmpty) {
           return 'Pilih dokter terlebih dahulu';
         }
+      },
+    );
+  }
+
+  Widget tglDaftarField() {
+    return MyTextFieldDatePicker(
+      labelText: "Tgl. Daftar",
+      lastDate: DateTime.now().add(Duration(days: 366)),
+      firstDate: DateTime(1900, 1),
+      initialDate: DateTime.now().add(Duration(days: 1)),
+      onDateChanged: (selectedDate) {
+        setState(() {
+          model.tgldaftar = selectedDate;
+        });
       },
     );
   }

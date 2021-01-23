@@ -65,7 +65,7 @@ class _MyTextFieldDatePicker extends State<MyTextFieldDatePicker> {
     return TextFormField(
       focusNode: widget.focusNode,
       controller: _controllerDate,
-      decoration: InputDecoration(labelText: 'Tanggal Lahir'),
+      decoration: InputDecoration(labelText: widget.labelText),
       onTap: () => _selectDate(context),
       readOnly: true,
     );

@@ -2,8 +2,9 @@ import 'package:klinikpratama/services/ApiService.dart';
 import 'package:intl/intl.dart';
 
 ApiService _apiService = ApiService();
-String tgl = DateFormat('yyyy-MM-dd').format(DateTime.now());
-String jam = DateFormat('hh:mm').format(DateTime.now());
+DateTime now = DateTime.now();
+String tgl = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+String jam = DateFormat('HH:mm:ss').format(now);
 
 class DataDokterService {
   static Future<List> getSuggestions(String query) async {
@@ -21,7 +22,10 @@ class DataDokterService {
             }));
 
     return List.generate(response.data.length, (index) {
-      return {"name": response.data[index]["pegawai_nama"], "price": ""};
+      return {
+        "name": response.data[index]["pegawai_nama"],
+        "id": response.data[index]["pegawai_id"]
+      };
     });
   }
 }
